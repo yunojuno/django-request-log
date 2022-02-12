@@ -38,8 +38,8 @@ def parse_request(request: HttpRequest) -> RequestKwargs:
     else:
         kwargs["session_key"] = ""
     # NB you can't store AnonymouseUsers, so don't bother trying
-    if (user := getattr(request, "user", None)) and user.is_authenticated:
-        kwargs["user"] = user
+    if hasattr(request, "user") and request.user.is_authenticated:
+        kwargs["user"] = request.user
     return kwargs
 
 
