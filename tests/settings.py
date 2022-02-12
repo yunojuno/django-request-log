@@ -1,9 +1,4 @@
-from distutils.version import StrictVersion
 from os import path
-
-import django
-
-DJANGO_VERSION = StrictVersion(django.get_version())
 
 DEBUG = True
 TEMPLATE_DEBUG = True
@@ -19,7 +14,7 @@ INSTALLED_APPS = (
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "my_app",
+    "request_logger",
 )
 
 MIDDLEWARE = [
