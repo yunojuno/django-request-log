@@ -34,7 +34,9 @@ def parse_request(request: HttpRequest) -> RequestKwargs:
     )
     # these two require middleware, so may not exist
     if session := getattr(request, "session", None):
-        kwargs["session_key"] = session.session_key
+        kwargs["session_key"] = session.session_key or ""
+    else:
+        kwargs["session_key"] = ""
     # NB you can't store AnonymouseUsers, so don't bother trying
     if (user := getattr(request, "user", None)) and user.is_authenticated:
         kwargs["user"] = user
@@ -67,10 +69,10 @@ class RequestLogBase(models.Model):
         ),
         db_index=True,
     )
-    session_key = models.CharField(blank=True, max_length=40)
+    session_key = models.CharField(blank=True, default="", max_length=40)
     http_method = models.CharField(max_length=10)
     request_uri = models.URLField(verbose_name=_lazy("Request path"))
-    query_string = models.CharField(max_length=1000, blank=True)
+    query_string = models.CharField(max_length=1000, blank=True, default="")
     remote_addr = models.CharField(max_length=100, default="")
     http_user_agent = models.CharField(max_length=400, default="")
     http_referer = models.CharField(max_length=400, default="")
@@ -85,6 +87,12 @@ class RequestLogBase(models.Model):
     )
     response_content_length = models.IntegerField(
         null=True, blank=True, help_text=_lazy("Length of the response body in bytes.")
+    )
+    response_content_type = models.CharField(
+        default="",
+        max_length=100,
+        blank=True,
+        help_text=_lazy("Response Content-Type header."),
     )
     response_location = models.CharField(
         max_length=400,

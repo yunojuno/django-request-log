@@ -26,6 +26,7 @@ class RequestLogAdmin(admin.ModelAdmin):
         "http_user_agent",
         "duration",
         "response_status_code",
+        "response_content_type",
         "response_content_length",
         "response_location",
     )
