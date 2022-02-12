@@ -28,6 +28,7 @@ class RequestLogAdmin(admin.ModelAdmin):
         "request_accepts",
         "request_content_type",
         "response_content_type",
+        "response_class",
         "http_status_code",
         "content_length",
         "redirect_to",

@@ -53,6 +53,7 @@ def parse_response(response: HttpResponse) -> ResponseKwargs:
     else:
         kwargs["content_length"] = len(response.content)
     kwargs["response_content_type"] = response.headers.get("Content-Type", "")
+    kwargs["response_class"] = response.__class__.__name__
     return kwargs
 
 
@@ -105,6 +106,10 @@ class RequestLogBase(models.Model):
     )
     content_length = models.IntegerField(
         null=True, blank=True, help_text=_lazy("Length of the response body in bytes.")
+    )
+    response_class = models.CharField(
+        max_length=50,
+        default="",
     )
     response_content_type = models.CharField(
         default="",
