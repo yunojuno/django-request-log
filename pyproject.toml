@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "django-request-logger"
+name = "django-request-logger-2"
 version = "0.1.0"
 description = "Django model for storing HttpRequest information."
 license = "MIT"
