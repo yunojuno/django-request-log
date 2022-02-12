@@ -27,4 +27,23 @@ from request_logger.decorators import log_request
 @log_request("downloads")
 def download(request: HttpRequest) -> HttpReponse:
     return HttpResponse("OK")
+    
+
+@log_request(lambda r: r.user.get_full_name())
+def download(request: HttpRequest) -> HttpReponse:
+    return HttpResponse("OK")
 ```
+
+The `log_request` argument is mandatory and is used as a "reference",
+or category classifier. It can be a str, or a callable which takes
+in the request as a single arg.
+
+## Screenshots
+
+**Admin list view**
+
+<img src="screenshots/admin-list.png">
+
+**Admin item view**
+
+<img src="screenshots/admin-edit.png">
