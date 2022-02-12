@@ -5,28 +5,32 @@ from .models import RequestLog
 
 @admin.register(RequestLog)
 class RequestLogAdmin(admin.ModelAdmin):
-    # pass
     list_display = (
         "id",
+        "user",
         "reference",
         "http_method",
         "request_uri",
-        "response_status_code",
+        "http_status_code",
         "duration",
-        "user",
     )
     readonly_fields = (
+        "user",
         "timestamp",
         "session_key",
         "http_method",
-        "request_uri",
-        "query_string",
+        "hostname",
+        "path",
+        "query",
         "remote_addr",
         "http_referer",
         "http_user_agent",
-        "duration",
-        "response_status_code",
+        "request_accepts",
+        "request_content_type",
         "response_content_type",
-        "response_content_length",
-        "response_location",
+        "http_status_code",
+        "content_length",
+        "redirect_to",
+        "duration",
     )
+    exclude = ("request_uri",)

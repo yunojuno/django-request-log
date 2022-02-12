@@ -1,14 +1,12 @@
+from __future__ import annotations
+
 import logging
 from functools import wraps
+from types import TracebackType
 from typing import Callable, TypeAlias
 
 from django.db import transaction
-from django.http import (
-    HttpRequest,
-    HttpResponse,
-    HttpResponseRedirect,
-    StreamingHttpResponse,
-)
+from django.http import HttpRequest, HttpResponse
 from django.utils import timezone
 
 from request_logger.models import RequestLog
@@ -19,33 +17,32 @@ logger = logging.getLogger(__name__)
 ReferenceFunc: TypeAlias = Callable[[HttpRequest], str]
 
 
-def log_request_response(
-    *,
-    request: HttpRequest,
-    response: HttpResponse,
-    reference: str,
-    duration: float,
-) -> RequestLog:
-    """Create RequestLog from request and response objects."""
-    location = getattr(response, "url", "")
-    if isinstance(response, HttpResponseRedirect):
-        location = response.url
-    else:
-        location = ""
-    if not isinstance(response, StreamingHttpResponse):
-        content_length = len(response.content)
-    else:
-        content_length = None
-    content_type = response.headers.get("Content-Type", "")
-    return RequestLog.objects.create(
-        request=request,
-        reference=reference,
-        duration=duration,
-        response_status_code=response.status_code,
-        response_location=location,
-        response_content_length=content_length,
-        response_content_type=content_type,
-    )
+class Timer(object):
+    """Context manager used to time a function call."""
+
+    def __enter__(self) -> Timer:
+        self.start_ts = timezone.now()
+        return self
+
+    def __exit__(
+        self,
+        exc_type: type | None,
+        exc_value: Exception | None,
+        traceback: TracebackType | None,
+    ) -> None:
+        self.end_ts = timezone.now()
+
+    @property
+    def duration(self) -> float:
+        return (self.end_ts - self.start_ts).total_seconds()
+
+
+def get_reference(request: HttpRequest, reference: str | ReferenceFunc) -> str:
+    if isinstance(reference, str):
+        return reference
+    if callable(reference):
+        return reference(request)
+    raise ValueError("Invalid reference argument - must be str or func.")
 
 
 @transaction.atomic
@@ -63,11 +60,11 @@ def log_request(reference: str | ReferenceFunc) -> Callable:
                 request_reference = reference(request)
             else:
                 raise ValueError("Invalid reference argument - must be str or func.")
-            start_ts = timezone.now()
-            response = func(request, *args, **kwargs)
-            duration = (timezone.now() - start_ts).total_seconds()
+            with Timer() as t:
+                response = func(request, *args, **kwargs)
+            duration = t.duration
             try:
-                log_request_response(
+                RequestLog.objects.create(
                     request=request,
                     response=response,
                     reference=request_reference,
