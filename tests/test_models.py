@@ -196,3 +196,74 @@ class TestModelProperties:
         assert rl.hostname == hostname
         assert rl.path == path
         assert rl.query == query
+
+    @pytest.mark.parametrize(
+        "id,method,url,status_code,expected",
+        [
+            (None, "GET", "", None, "GET"),
+            (1, "GET", "http://google.com", 200, "[200] GET"),
+            (1, "GET", "http://google.com/foo", 200, "[200] GET /foo"),
+        ],
+    )
+    def test_str(
+        self,
+        id: int | None,
+        method: str,
+        url: str,
+        status_code: int | None,
+        expected: str,
+    ) -> None:
+        rl = RequestLog(
+            id=id,
+            http_method=method,
+            request_uri=url,
+            http_status_code=status_code,
+        )
+        assert str(rl) == expected
+
+    @pytest.mark.parametrize(
+        "id,method,url,status_code,user_id,expected",
+        [
+            (
+                None,
+                "GET",
+                "",
+                None,
+                None,
+                "<RequestLog id=None method='GET' status_code=None path='' user=None>",
+            ),
+            (
+                1,
+                "GET",
+                "http://google.com",
+                200,
+                None,
+                "<RequestLog id=1 method='GET' status_code=200 path='' user=None>",
+            ),
+            (
+                1,
+                "GET",
+                "http://google.com/foo",
+                200,
+                1,
+                "<RequestLog id=1 method='GET' status_code=200 path='/foo' user=1>",
+            ),
+        ],
+    )
+    def test_repr(
+        self,
+        id: int | None,
+        method: str,
+        url: str,
+        status_code: int | None,
+        user_id: int | None,
+        expected: str,
+    ) -> None:
+        rl = RequestLog(
+            id=id,
+            http_method=method,
+            request_uri=url,
+            http_status_code=status_code,
+            user_id=user_id,
+        )
+        assert repr(rl) == expected

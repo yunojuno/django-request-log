@@ -37,7 +37,7 @@ class Timer(object):
         return (self.end_ts - self.start_ts).total_seconds()
 
 
-def get_reference(request: HttpRequest, reference: str | ReferenceFunc) -> str:
+def get_request_reference(request: HttpRequest, reference: str | ReferenceFunc) -> str:
     if isinstance(reference, str):
         return reference
     if callable(reference):
@@ -54,12 +54,7 @@ def log_request(reference: str | ReferenceFunc) -> Callable:
         def inner_func(
             request: HttpRequest, *args: object, **kwargs: object
         ) -> HttpResponse:
-            if isinstance(reference, str):
-                request_reference = reference
-            elif callable(reference):
-                request_reference = reference(request)
-            else:
-                raise ValueError("Invalid reference argument - must be str or func.")
+            request_reference = get_request_reference(request, reference)
             with Timer() as t:
                 response = func(request, *args, **kwargs)
             duration = t.duration

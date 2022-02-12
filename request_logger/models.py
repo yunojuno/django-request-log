@@ -126,12 +126,15 @@ class RequestLogBase(models.Model):
         abstract = True
 
     def __str__(self) -> str:
-        return f"[{self.http_status_code}] {self.http_method} {self.path}".strip()
+        if self.http_status_code:
+            return f"[{self.http_status_code}] {self.http_method} {self.path}".strip()
+        return f"{self.http_method} {self.path}".strip()
 
     def __repr__(self) -> str:
         return (
-            f"<RequestLog id={self.pk}; status_code={self.http_status_code}; "
-            f"uri='{self.request_uri}'>"
+            f"<RequestLog id={self.id} method='{self.http_method}' "
+            f"status_code={self.http_status_code} "
+            f"path='{self.path}' user={self.user_id}>"
         )
 
     @property
