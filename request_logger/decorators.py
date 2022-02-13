@@ -3,13 +3,15 @@ from __future__ import annotations
 import logging
 from functools import wraps
 from types import TracebackType
-from typing import Callable, TypeAlias
+from typing import Callable
 
 from django.db import transaction
 from django.http import HttpRequest, HttpResponse
 from django.utils import timezone
 
 from request_logger.models import RequestLog
+
+from .compat import TypeAlias
 
 logger = logging.getLogger(__name__)
 

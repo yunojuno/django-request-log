@@ -29,6 +29,7 @@ packages = [{ include = "request_logger" }]
 [tool.poetry.dependencies]
 python = "^3.8"
 django = "^3.0 || ^4.0"
+typing-extensions = "^4.1.0"
 
 [tool.poetry.dev-dependencies]
 black = {version = "*", allow-prereleases = true}

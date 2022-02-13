@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from typing import TypeAlias
 from urllib.parse import ParseResult, urlparse
 
 from django.conf import settings
@@ -10,6 +9,8 @@ from django.http import HttpRequest, HttpResponse, StreamingHttpResponse
 from django.template.response import ContentNotRenderedError
 from django.utils.timezone import now as tz_now
 from django.utils.translation import gettext_lazy as _lazy
+
+from .compat import TypeAlias
 
 # TODO: work out how to get this to work with get_user_model | AUTH_USER_MODEL
 User: TypeAlias = AbstractUser
