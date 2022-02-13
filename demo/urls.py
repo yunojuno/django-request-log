@@ -11,4 +11,5 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("200/", views.http_200, name="200"),
     path("301/", views.http_301, name="301"),
+    path("drf/", views.drf, name="drf"),
 ]

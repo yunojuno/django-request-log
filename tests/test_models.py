@@ -81,6 +81,7 @@ class TestParseResponse:
             "http_status_code": response.status_code,
             "redirect_to": "",
             "response_content_type": response.headers["Content-Type"],
+            "response_class": "django.http.response.HttpResponse",
         }
 
     def test_redirect_to(self) -> None:

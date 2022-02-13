@@ -7,6 +7,7 @@ from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.http import HttpRequest, HttpResponse, StreamingHttpResponse
+from django.template.response import ContentNotRenderedError
 from django.utils.timezone import now as tz_now
 from django.utils.translation import gettext_lazy as _lazy
 
@@ -43,17 +44,30 @@ def parse_request(request: HttpRequest) -> RequestKwargs:
     return kwargs
 
 
+def get_content_length(response: HttpResponse) -> int | None:
+    if isinstance(response, StreamingHttpResponse):
+        return None
+    try:
+        return len(response.content)
+    except ContentNotRenderedError:
+        pass
+    return None
+
+
+def get_response_klass(response: HttpResponse) -> str:
+    klass = response.__class__
+    module = klass.__module__
+    return f"{module}.{klass.__name__}"
+
+
 def parse_response(response: HttpResponse) -> ResponseKwargs:
     """Extract values from HttpResponse."""
     kwargs: ResponseKwargs = {}
     kwargs["http_status_code"] = response.status_code
     kwargs["redirect_to"] = getattr(response, "url", "")
-    if isinstance(response, StreamingHttpResponse):
-        kwargs["content_length"] = None
-    else:
-        kwargs["content_length"] = len(response.content)
+    kwargs["content_length"] = get_content_length(response)
     kwargs["response_content_type"] = response.headers.get("Content-Type", "")
-    kwargs["response_class"] = response.__class__.__name__
+    kwargs["response_class"] = get_response_klass(response)
     return kwargs
 
 
