@@ -22,6 +22,7 @@ ResponseKwargs: TypeAlias = dict[str, str | int | None]
 def parse_request(request: HttpRequest) -> RequestKwargs:
     """Extract values from HttpRequest."""
     kwargs: RequestKwargs = {}
+    kwargs["view_func"] = request.resolver_match._func_path
     kwargs["request_uri"] = request.build_absolute_uri()
     kwargs["http_method"] = request.method
     kwargs["request_content_type"] = request.content_type
@@ -95,12 +96,13 @@ class RequestLogBase(models.Model):
         null=True,
         blank=True,
     )
-    reference = models.CharField(
-        max_length=100,
+    view_func = models.CharField(
+        blank=True,
+        default="",
+        max_length=200,
         help_text=_lazy(
-            "General-purpose free text field - useful for classifying requests."
+            "View function path - taken from request.resolver_match._func_path"
         ),
-        db_index=True,
     )
     session_key = models.CharField(blank=True, default="", max_length=40)
     request_uri = models.URLField(

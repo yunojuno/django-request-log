@@ -8,7 +8,6 @@ class RequestLogAdmin(admin.ModelAdmin):
     list_display = (
         "id",
         "user",
-        "reference",
         "http_method",
         "request_uri",
         "http_status_code",
@@ -16,6 +15,7 @@ class RequestLogAdmin(admin.ModelAdmin):
     )
     readonly_fields = (
         "user",
+        "view_func",
         "timestamp",
         "session_key",
         "http_method",
