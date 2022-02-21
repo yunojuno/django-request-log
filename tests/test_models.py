@@ -99,7 +99,7 @@ class TestRequestLogManager:
     def test_create__no_args(self) -> None:
         rl = RequestLog.objects.create()
         assert rl.user is None
-        assert rl.reference == ""
+        assert rl.source == "request_logger.RequestLog"
         assert rl.session_key == ""
         assert rl.request_uri == ""
         assert rl.remote_addr == ""
@@ -119,7 +119,7 @@ class TestRequestLogManager:
         request = rf.get("/")
         rl = RequestLog.objects.create(request)
         assert rl.user is None
-        assert rl.reference == ""
+        assert rl.source == "request_logger.RequestLog"
         assert rl.session_key == ""
         assert rl.request_uri == "http://testserver/"
         assert rl.remote_addr == "127.0.0.1"
@@ -140,7 +140,7 @@ class TestRequestLogManager:
         response = HttpResponse()
         rl = RequestLog.objects.create(request=request, response=response)
         assert rl.user is None
-        assert rl.reference == ""
+        assert rl.source == "request_logger.RequestLog"
         assert rl.session_key == ""
         assert rl.request_uri == "http://testserver/"
         assert rl.remote_addr == "127.0.0.1"
@@ -155,10 +155,6 @@ class TestRequestLogManager:
         assert rl.redirect_to == ""
         assert rl.duration is None
         assert rl.timestamp is not None
-
-    def test_create__reference(self, rf: RequestFactory) -> None:
-        rl = RequestLog.objects.create(reference="foo")
-        assert rl.reference == "foo"
 
     def test_create__duration(self) -> None:
         rl = RequestLog.objects.create(duration=0.123)

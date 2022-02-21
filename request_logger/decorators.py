@@ -48,7 +48,7 @@ def get_request_reference(request: HttpRequest, reference: str | ReferenceFunc) 
 
 
 @transaction.atomic
-def log_request(reference: str | ReferenceFunc) -> Callable:
+def log_request() -> Callable:
     """Decorate view function to log a request-response."""
 
     def decorator(func: Callable) -> Callable:
@@ -56,7 +56,6 @@ def log_request(reference: str | ReferenceFunc) -> Callable:
         def inner_func(
             request: HttpRequest, *args: object, **kwargs: object
         ) -> HttpResponse:
-            request_reference = get_request_reference(request, reference)
             with Timer() as t:
                 response = func(request, *args, **kwargs)
             duration = t.duration
@@ -64,36 +63,6 @@ def log_request(reference: str | ReferenceFunc) -> Callable:
                 RequestLog.objects.create(
                     request=request,
                     response=response,
-                    reference=request_reference,
-                    duration=duration,
-                )
-            except Exception:  # noqa: B902
-                logger.exception("Error storing RequestLog.")
-            return response
-
-        return inner_func
-
-    return decorator
-
-
-@transaction.atomic
-def log_request_method(reference: str | ReferenceFunc) -> Callable:
-    """Decorate CBV method to log a request-response."""
-
-    def decorator(func: Callable) -> Callable:
-        @wraps(func)
-        def inner_func(
-            obj: object, request: HttpRequest, *args: object, **kwargs: object
-        ) -> HttpResponse:
-            request_reference = get_request_reference(request, reference)
-            with Timer() as t:
-                response = func(request, *args, **kwargs)
-            duration = t.duration
-            try:
-                RequestLog.objects.create(
-                    request=request,
-                    response=response,
-                    reference=request_reference,
                     duration=duration,
                 )
             except Exception:  # noqa: B902

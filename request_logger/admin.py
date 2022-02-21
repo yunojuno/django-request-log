@@ -12,9 +12,12 @@ class RequestLogAdmin(admin.ModelAdmin):
         "request_uri",
         "http_status_code",
         "duration",
+        "source",
+        "timestamp",
     )
     readonly_fields = (
         "user",
+        "source",
         "view_func",
         "timestamp",
         "session_key",
@@ -33,5 +36,9 @@ class RequestLogAdmin(admin.ModelAdmin):
         "content_length",
         "redirect_to",
         "duration",
+    )
+    list_filter = (
+        "source",
+        "timestamp",
     )
     exclude = ("request_uri",)
