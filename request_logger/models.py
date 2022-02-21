@@ -13,7 +13,6 @@ from django.utils.translation import gettext_lazy as _lazy
 
 # TODO: work out how to get this to work with get_user_model | AUTH_USER_MODEL
 User: TypeAlias = AbstractUser
-
 RequestKwargs: TypeAlias = dict[str, str | User | None]
 ResponseKwargs: TypeAlias = dict[str, str | int | None]
 
@@ -189,6 +188,14 @@ class RequestLogBase(models.Model):
     @property
     def query(self) -> str:
         return self.url_components.query
+
+    def anonymise(self) -> None:
+        """Remove sensitive personal data from the record."""
+        self.user = None
+        self.session_key = "****"
+        self.remote_addr = "****"
+        self.http_user_agent = "****"
+        self.save()
 
 
 class RequestLog(RequestLogBase):

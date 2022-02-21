@@ -1,6 +1,8 @@
+from __future__ import annotations
+
 from django.contrib import admin
 
-from .models import RequestLog
+from request_logger.models import RequestLog
 
 
 @admin.register(RequestLog)

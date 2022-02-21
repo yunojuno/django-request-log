@@ -1,3 +1,6 @@
+from __future__ import annotations
+
+from types import SimpleNamespace
 from unittest import mock
 
 import pytest
@@ -274,3 +277,29 @@ class TestModelProperties:
             user_id=user_id,
         )
         assert repr(rl) == expected
+
+
+@pytest.mark.django_db
+def test_anonymise(rf: RequestFactory) -> None:
+    request = rf.get(
+        "/",
+        HTTP_USER_AGENT="spyware 1.0",
+        REMOTE_ADDR="4.3.2.1",
+    )
+    request.user = User.objects.create(username="foo")
+    request.session = SimpleNamespace(session_key="bar")
+    rl = RequestLog.objects.create(request=request)
+    assert rl.http_user_agent == "spyware 1.0"
+    assert rl.remote_addr == "4.3.2.1"
+    assert rl.user.username == "foo"
+    assert rl.session_key == "bar"
+    rl.anonymise()
+    assert rl.user is None
+    assert rl.session_key == "****"
+    assert rl.http_user_agent == "****"
+    assert rl.remote_addr == "****"
+    rl.refresh_from_db()
+    assert rl.user is None
+    assert rl.session_key == "****"
+    assert rl.http_user_agent == "****"
+    assert rl.remote_addr == "****"
