@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "django-request-logger-2"
-version = "0.2"
+version = "0.3"
 description = "Django model for storing HttpRequest information."
 license = "MIT"
 authors = ["YunoJuno <code@yunojuno.com>"]
