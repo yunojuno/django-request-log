@@ -15,6 +15,8 @@ logger = logging.getLogger(__name__)
 
 # if the reference arg is not a fixed str, it must be a callable
 ReferenceFunc: TypeAlias = Callable[[HttpRequest], str]
+# functions used to filter in/out request to log
+RequestFilterFunc: TypeAlias = Callable[[HttpRequest], bool]
 
 
 class Timer(object):
@@ -37,8 +39,20 @@ class Timer(object):
         return (self.end_ts - self.start_ts).total_seconds()
 
 
+def _include(request: HttpRequest) -> bool:
+    # default decorator 'include' argument - returns True to log all requests
+    return True
+
+
+def _exclude(request: HttpRequest) -> bool:
+    # default decorator 'exclude' argument - returns False to exclude no requests
+    return False
+
+
 @transaction.atomic
-def log_request() -> Callable:
+def log_request(
+    include: RequestFilterFunc = _include, exclude: RequestFilterFunc = _exclude
+) -> Callable:
     """Decorate view function to log a request-response."""
 
     def decorator(func: Callable) -> Callable:
@@ -49,6 +63,10 @@ def log_request() -> Callable:
             with Timer() as t:
                 response = func(request, *args, **kwargs)
             duration = t.duration
+            if not include(request):
+                return response
+            if exclude(request):
+                return response
             try:
                 RequestLog.objects.create(
                     request=request,

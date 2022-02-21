@@ -33,3 +33,22 @@ class TestLogRequest:
             resp = func(request)
         assert resp.status_code == 200
         assert RequestLog.objects.count() == 0
+
+    @pytest.mark.parametrize(
+        "include,exclude,expected",
+        [
+            (lambda r: True, lambda r: False, 1),
+            (lambda r: False, lambda r: False, 0),
+            (lambda r: False, lambda r: True, 0),
+            (lambda r: True, lambda r: True, 0),
+        ],
+    )
+    def test_log_request_filters(
+        self, rf: RequestFactory, include, exclude, expected
+    ) -> None:
+        """Test that RequestLog include/exclude function args."""
+        request = rf.get("/")
+        func = decorators.log_request(include=include, exclude=exclude)(view_func)
+        resp = func(request)
+        assert resp.status_code == 200
+        assert RequestLog.objects.count() == expected
