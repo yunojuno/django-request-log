@@ -1,14 +1,14 @@
 [tool.poetry]
 name = "django-request-logger-2"
-version = "0.1.1"
+version = "0.2"
 description = "Django model for storing HttpRequest information."
 license = "MIT"
 authors = ["YunoJuno <code@yunojuno.com>"]
 maintainers = ["YunoJuno <code@yunojuno.com>"]
 readme = "README.md"
-homepage = "https://github.com/yunojuno/poetry-template"
-repository = "https://github.com/yunojuno/poetry-template"
-documentation = "https://github.com/yunojuno/poetry-template"
+homepage = "https://github.com/yunojuno/django-request-log"
+repository = "https://github.com/yunojuno/django-request-log"
+documentation = "https://github.com/yunojuno/django-request-log"
 classifiers = [
     "Development Status :: 4 - Beta",
     "Environment :: Web Environment",

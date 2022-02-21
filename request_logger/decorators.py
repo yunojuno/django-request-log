@@ -10,11 +10,14 @@ from django.http import HttpRequest, HttpResponse
 from django.utils import timezone
 
 from request_logger.models import RequestLog
+from request_logger.settings import DEFAULT_EXCLUDE_FUNC, DEFAULT_INCLUDE_FUNC
 
 logger = logging.getLogger(__name__)
 
 # if the reference arg is not a fixed str, it must be a callable
 ReferenceFunc: TypeAlias = Callable[[HttpRequest], str]
+# functions used to filter in/out request to log
+RequestFilterFunc: TypeAlias = Callable[[HttpRequest], bool]
 
 
 class Timer(object):
@@ -38,8 +41,24 @@ class Timer(object):
 
 
 @transaction.atomic
-def log_request() -> Callable:
-    """Decorate view function to log a request-response."""
+def log_request(
+    include: RequestFilterFunc = DEFAULT_INCLUDE_FUNC,
+    exclude: RequestFilterFunc = DEFAULT_EXCLUDE_FUNC,
+) -> Callable:
+    """
+    Decorate view function to log a request-response.
+
+    The two decorator arguments, include & exclude, are used to control whether
+    a request is logged or not. By default all requests are logged, but if you
+    wish to have fine-grained control over the logging, this is where to do it.
+
+    For instance, if you want to ignore all staff user requests:
+
+        @log_request(exclude=lambda r: r.user.is_staff)
+        def view(request):
+            pass
+
+    """
 
     def decorator(func: Callable) -> Callable:
         @wraps(func)
@@ -49,6 +68,10 @@ def log_request() -> Callable:
             with Timer() as t:
                 response = func(request, *args, **kwargs)
             duration = t.duration
+            if not include(request):
+                return response
+            if exclude(request):
+                return response
             try:
                 RequestLog.objects.create(
                     request=request,
