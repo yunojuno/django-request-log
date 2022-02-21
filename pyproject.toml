@@ -20,16 +20,13 @@ classifiers = [
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
     "Programming Language :: Python :: 3 :: Only",
-    "Programming Language :: Python :: 3.8",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
 ]
 packages = [{ include = "request_logger" }]
 
 [tool.poetry.dependencies]
-python = "^3.8"
+python = "^3.10"
 django = "^3.0 || ^4.0"
-typing-extensions = "^4.1.0"
 
 [tool.poetry.dev-dependencies]
 black = {version = "*", allow-prereleases = true}

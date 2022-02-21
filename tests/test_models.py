@@ -6,6 +6,7 @@ from django.contrib.auth.models import AnonymousUser
 from django.contrib.sessions.backends.base import SessionBase
 from django.http import HttpResponse, StreamingHttpResponse
 from django.test import RequestFactory
+from django.urls import ResolverMatch
 
 from request_logger.models import RequestLog, parse_request, parse_response
 
@@ -28,7 +29,13 @@ class TestParseRequest:
 
     def test_content_type(self, rf: RequestFactory) -> None:
         request = rf.get("/", CONTENT_TYPE="application/foo")
-        assert parse_request(request)["request_content_type"] == "application/foo"
+        request_data = parse_request(request)
+        assert request_data["request_content_type"] == "application/foo"
+
+    def test_view_func(self, rf: RequestFactory) -> None:
+        request = rf.get("/", CONTENT_TYPE="application/foo")
+        request.resolver_match = mock.MagicMock(spec=ResolverMatch, _func_path="foo")
+        assert parse_request(request)["view_func"] == "foo"
 
     def test_accepts(self, rf: RequestFactory) -> None:
         request = rf.get("/", HTTP_ACCEPT="application/foo")
@@ -100,6 +107,7 @@ class TestRequestLogManager:
         rl = RequestLog.objects.create()
         assert rl.user is None
         assert rl.source == "request_logger.RequestLog"
+        assert rl.view_func == ""
         assert rl.session_key == ""
         assert rl.request_uri == ""
         assert rl.remote_addr == ""
@@ -120,6 +128,7 @@ class TestRequestLogManager:
         rl = RequestLog.objects.create(request)
         assert rl.user is None
         assert rl.source == "request_logger.RequestLog"
+        assert rl.view_func == ""
         assert rl.session_key == ""
         assert rl.request_uri == "http://testserver/"
         assert rl.remote_addr == "127.0.0.1"
@@ -141,6 +150,7 @@ class TestRequestLogManager:
         rl = RequestLog.objects.create(request=request, response=response)
         assert rl.user is None
         assert rl.source == "request_logger.RequestLog"
+        assert rl.view_func == ""
         assert rl.session_key == ""
         assert rl.request_uri == "http://testserver/"
         assert rl.remote_addr == "127.0.0.1"

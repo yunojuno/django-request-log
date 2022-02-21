@@ -3,15 +3,13 @@ from __future__ import annotations
 import logging
 from functools import wraps
 from types import TracebackType
-from typing import Callable
+from typing import Callable, TypeAlias
 
 from django.db import transaction
 from django.http import HttpRequest, HttpResponse
 from django.utils import timezone
 
 from request_logger.models import RequestLog
-
-from .compat import TypeAlias
 
 logger = logging.getLogger(__name__)
 
@@ -37,14 +35,6 @@ class Timer(object):
     @property
     def duration(self) -> float:
         return (self.end_ts - self.start_ts).total_seconds()
-
-
-def get_request_reference(request: HttpRequest, reference: str | ReferenceFunc) -> str:
-    if isinstance(reference, str):
-        return reference
-    if callable(reference):
-        return reference(request)
-    raise ValueError("Invalid reference argument - must be str or func.")
 
 
 @transaction.atomic
