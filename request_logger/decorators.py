@@ -3,15 +3,13 @@ from __future__ import annotations
 import logging
 from functools import wraps
 from types import TracebackType
-from typing import Callable
+from typing import Callable, TypeAlias
 
 from django.db import transaction
 from django.http import HttpRequest, HttpResponse
 from django.utils import timezone
 
 from request_logger.models import RequestLog
-
-from .compat import TypeAlias
 
 logger = logging.getLogger(__name__)
 
@@ -39,16 +37,8 @@ class Timer(object):
         return (self.end_ts - self.start_ts).total_seconds()
 
 
-def get_request_reference(request: HttpRequest, reference: str | ReferenceFunc) -> str:
-    if isinstance(reference, str):
-        return reference
-    if callable(reference):
-        return reference(request)
-    raise ValueError("Invalid reference argument - must be str or func.")
-
-
 @transaction.atomic
-def log_request(reference: str | ReferenceFunc) -> Callable:
+def log_request() -> Callable:
     """Decorate view function to log a request-response."""
 
     def decorator(func: Callable) -> Callable:
@@ -56,7 +46,6 @@ def log_request(reference: str | ReferenceFunc) -> Callable:
         def inner_func(
             request: HttpRequest, *args: object, **kwargs: object
         ) -> HttpResponse:
-            request_reference = get_request_reference(request, reference)
             with Timer() as t:
                 response = func(request, *args, **kwargs)
             duration = t.duration
@@ -64,7 +53,6 @@ def log_request(reference: str | ReferenceFunc) -> Callable:
                 RequestLog.objects.create(
                     request=request,
                     response=response,
-                    reference=request_reference,
                     duration=duration,
                 )
             except Exception:  # noqa: B902

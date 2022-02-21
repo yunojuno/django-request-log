@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from typing import TypeAlias
 from urllib.parse import ParseResult, urlparse
 
 from django.conf import settings
@@ -9,8 +10,6 @@ from django.http import HttpRequest, HttpResponse, StreamingHttpResponse
 from django.template.response import ContentNotRenderedError
 from django.utils.timezone import now as tz_now
 from django.utils.translation import gettext_lazy as _lazy
-
-from .compat import TypeAlias
 
 # TODO: work out how to get this to work with get_user_model | AUTH_USER_MODEL
 User: TypeAlias = AbstractUser
@@ -22,6 +21,8 @@ ResponseKwargs: TypeAlias = dict[str, str | int | None]
 def parse_request(request: HttpRequest) -> RequestKwargs:
     """Extract values from HttpRequest."""
     kwargs: RequestKwargs = {}
+    if getattr(request, "resolver_match"):
+        kwargs["view_func"] = request.resolver_match._func_path
     kwargs["request_uri"] = request.build_absolute_uri()
     kwargs["http_method"] = request.method
     kwargs["request_content_type"] = request.content_type
@@ -83,6 +84,7 @@ class RequestLogManager(models.Manager):
             kwargs.update(parse_request(request))
         if response:
             kwargs.update(parse_response(response))
+        kwargs["source"] = self.model._meta.label
         return super().create(**kwargs)
 
 
@@ -95,12 +97,19 @@ class RequestLogBase(models.Model):
         null=True,
         blank=True,
     )
-    reference = models.CharField(
-        max_length=100,
+    source = models.CharField(
+        blank=True,
+        default="",
+        max_length=200,
+        help_text=_lazy("Class path of model used to log the request."),
+    )
+    view_func = models.CharField(
+        blank=True,
+        default="",
+        max_length=200,
         help_text=_lazy(
-            "General-purpose free text field - useful for classifying requests."
+            "View function path - taken from request.resolver_match._func_path"
         ),
-        db_index=True,
     )
     session_key = models.CharField(blank=True, default="", max_length=40)
     request_uri = models.URLField(
