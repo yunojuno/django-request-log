@@ -21,10 +21,10 @@ def parse_request(request: HttpRequest) -> RequestKwargs:
     """Extract values from HttpRequest."""
     kwargs: RequestKwargs = {}
     if getattr(request, "resolver_match"):
-        kwargs["view_func"] = request.resolver_match._func_path
+        kwargs["view_func"] = request.resolver_match._func_path[:200]
     kwargs["request_uri"] = request.build_absolute_uri()
-    kwargs["http_method"] = request.method
-    kwargs["request_content_type"] = request.content_type
+    kwargs["http_method"] = request.method[:10]
+    kwargs["request_content_type"] = request.content_type[:100]
     kwargs["request_accepts"] = request.headers.get("accept", "")[:200]
     kwargs["http_user_agent"] = request.META.get("HTTP_USER_AGENT", "")[:400]
     kwargs["http_referer"] = request.META.get("HTTP_REFERER", "")[:400]
@@ -34,7 +34,7 @@ def parse_request(request: HttpRequest) -> RequestKwargs:
         request.META.get("HTTP_X_FORWARDED_FOR")
         if "HTTP_X_FORWARDED_FOR" in request.META
         else request.META.get("REMOTE_ADDR", "")
-    )
+    )[:100]
     if session := getattr(request, "session", None):
         kwargs["session_key"] = session.session_key or ""
     else:
@@ -65,10 +65,10 @@ def parse_response(response: HttpResponse) -> ResponseKwargs:
     """Extract values from HttpResponse."""
     kwargs: ResponseKwargs = {}
     kwargs["http_status_code"] = response.status_code
-    kwargs["redirect_to"] = getattr(response, "url", "")
+    kwargs["redirect_to"] = getattr(response, "url", "")[:400]
     kwargs["content_length"] = get_content_length(response)
     kwargs["response_content_type"] = response.headers.get("Content-Type", "")
-    kwargs["response_class"] = get_response_klass(response)
+    kwargs["response_class"] = get_response_klass(response)[:100]
     return kwargs
 
 
@@ -131,7 +131,7 @@ class RequestLogBase(models.Model):
         null=True, blank=True, help_text=_lazy("Length of the response body in bytes.")
     )
     response_class = models.CharField(
-        max_length=50,
+        max_length=100,
         default="",
     )
     response_content_type = models.CharField(
