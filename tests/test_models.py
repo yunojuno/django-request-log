@@ -27,6 +27,7 @@ class TestParseRequest:
             "request_accepts": "",
             "request_content_type": "",
             "request_uri": "http://testserver/",
+            "context": {},
             "session_key": "",
         }
 
@@ -79,6 +80,16 @@ class TestParseRequest:
         request = rf.get("/")
         request.user = AnonymousUser()
         assert "user" not in parse_request(request)
+
+    def test_context(self, rf: RequestFactory) -> None:
+        request = rf.get("/")
+        request.foo = "bar"
+
+        def _extractor(request):
+            return {"foo": request.foo}
+
+        with mock.patch("request_logger.models.REQUEST_CONTEXT_EXTRACTOR", _extractor):
+            assert parse_request(request).get("context") == {"foo": "bar"}
 
 
 class TestParseResponse:

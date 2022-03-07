@@ -5,11 +5,14 @@ from urllib.parse import ParseResult, urlparse
 
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
+from django.core.serializers.json import DjangoJSONEncoder
 from django.db import models
 from django.http import HttpRequest, HttpResponse, StreamingHttpResponse
 from django.template.response import ContentNotRenderedError
 from django.utils.timezone import now as tz_now
 from django.utils.translation import gettext_lazy as _lazy
+
+from .settings import REQUEST_CONTEXT_EXTRACTOR
 
 # TODO: work out how to get this to work with get_user_model | AUTH_USER_MODEL
 User: TypeAlias = AbstractUser
@@ -42,6 +45,8 @@ def parse_request(request: HttpRequest) -> RequestKwargs:
     # NB you can't store AnonymouseUsers, so don't bother trying
     if hasattr(request, "user") and request.user.is_authenticated:
         kwargs["user"] = request.user
+    # extract custom data from the request
+    kwargs["context"] = REQUEST_CONTEXT_EXTRACTOR(request)
     return kwargs
 
 
@@ -147,6 +152,15 @@ class RequestLogBase(models.Model):
         blank=True, null=True, verbose_name=_lazy("Request duration (sec)")
     )
     timestamp = models.DateTimeField(default=tz_now)
+    context = models.JSONField(
+        default=dict,
+        blank=True,
+        encoder=DjangoJSONEncoder,
+        help_text=_lazy(
+            "Customisable JSON extracted from the request "
+            "using REQUEST_LOGGER_CONTEXT_EXTRACTOR"
+        ),
+    )
 
     objects: RequestLogManager = RequestLogManager()
 
