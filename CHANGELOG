@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## v0.4
+
+- Add Django 4.2, 5.0
+- Add Python 3.12
+
 ## v0.3.2
 
 - Drops support for Django 3.0 and 3.1

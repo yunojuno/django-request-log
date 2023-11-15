@@ -46,7 +46,7 @@ class TestLogRequest:
         ],
     )
     def test_log_request_filters(
-        self, rf: RequestFactory, include, exclude, expected
+        self, rf: RequestFactory, include: bool, exclude: bool, expected: int
     ) -> None:
         """Test that RequestLog include/exclude function args."""
         request = rf.get("/")

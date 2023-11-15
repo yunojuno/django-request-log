@@ -1,11 +1,11 @@
 [tool.poetry]
 name = "django-request-logger-2"
-version = "0.3.2"
+version = "0.4"
 description = "Django model for storing HttpRequest information."
 license = "MIT"
 authors = ["YunoJuno <code@yunojuno.com>"]
 maintainers = ["YunoJuno <code@yunojuno.com>"]
-readme = "README.md"
+readme = "README"
 homepage = "https://github.com/yunojuno/django-request-log"
 repository = "https://github.com/yunojuno/django-request-log"
 documentation = "https://github.com/yunojuno/django-request-log"
@@ -16,36 +16,34 @@ classifiers = [
     "Framework :: Django :: 3.2",
     "Framework :: Django :: 4.0",
     "Framework :: Django :: 4.1",
+    "Framework :: Django :: 4.2",
+    "Framework :: Django :: 5.0",
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
     "Programming Language :: Python :: 3 :: Only",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
 ]
 packages = [{ include = "request_logger" }]
 
 [tool.poetry.dependencies]
-python = "^3.8"
-django = "^3.2 || ^4.0"
+python = "^3.10"
+django = "^3.2 || ^4.0 || ^5.0"
+django-rest-framework = { version = "*", optional = true }
 
-[tool.poetry.dev-dependencies]
+[tool.poetry.group.dev.dependencies]
 black = "*"
 coverage = "*"
-django-rest-framework = "^0.1.0"
-flake8 = "*"
-flake8-bandit = "*"
-flake8-blind-except = "*"
-flake8-docstrings = "*"
-flake8-logging-format = "*"
-flake8-print = "*"
-freezegun = "*"
-isort = "*"
 mypy = "*"
 pre-commit = "*"
 pytest = "*"
 pytest-cov = "*"
 pytest-django = "*"
 tox = "*"
+
+[tool.poetry.extras]
+demo = ["django-rest-framework"]
 
 [build-system]
 requires = ["poetry>=0.12"]

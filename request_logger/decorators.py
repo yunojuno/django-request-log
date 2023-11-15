@@ -20,7 +20,7 @@ ReferenceFunc: TypeAlias = Callable[[HttpRequest], str]
 RequestFilterFunc: TypeAlias = Callable[[HttpRequest], bool]
 
 
-class Timer(object):
+class Timer:
     """Context manager used to time a function call."""
 
     def __enter__(self) -> Timer:

@@ -7,7 +7,7 @@ import pytest
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AnonymousUser
 from django.contrib.sessions.backends.base import SessionBase
-from django.http import HttpResponse, StreamingHttpResponse
+from django.http import HttpRequest, HttpResponse, StreamingHttpResponse
 from django.test import RequestFactory
 from django.urls import ResolverMatch
 
@@ -85,7 +85,7 @@ class TestParseRequest:
         request = rf.get("/")
         request.foo = "bar"
 
-        def _extractor(request):
+        def _extractor(request: HttpRequest) -> dict:
             return {"foo": request.foo}
 
         with mock.patch("request_logger.models.REQUEST_CONTEXT_EXTRACTOR", _extractor):
@@ -209,7 +209,13 @@ class TestModelProperties:
         ],
     )
     def test_url_components(
-        self, request_uri, scheme, netloc, hostname, path, query
+        self,
+        request_uri: str,
+        scheme: str,
+        netloc: str,
+        hostname: str,
+        path: str,
+        query: str,
     ) -> None:
         rl = RequestLog(request_uri=request_uri)
         assert rl.scheme == scheme
@@ -228,7 +234,7 @@ class TestModelProperties:
     )
     def test_str(
         self,
-        id: int | None,
+        id: int | None,  # noqa: A002
         method: str,
         url: str,
         status_code: int | None,
@@ -273,7 +279,7 @@ class TestModelProperties:
     )
     def test_repr(
         self,
-        id: int | None,
+        id: int | None,  # noqa: A002
         method: str,
         url: str,
         status_code: int | None,
