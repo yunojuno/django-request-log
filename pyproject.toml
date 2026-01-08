@@ -30,6 +30,7 @@ django-rest-framework = { version = "*", optional = true }
 
 [tool.poetry.group.dev.dependencies]
 black = "*"
+django-rest-framework = "*"
 coverage = "*"
 mypy = "*"
 pre-commit = "*"
