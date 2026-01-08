@@ -2,6 +2,8 @@
 
 Simple Django model for logging HttpRequest instances.
 
+**Compatibility:** Python 3.12+ and Django 5.2-6.0
+
 ## Why?
 
 We have a number of libraries that store elements of a request (path,
